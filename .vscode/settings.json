@@ -1,0 +1,25 @@
+// Requiere que latexmk.exe este disponible en el PATH del sistema.
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "latexmk (MiKTeX Windows)",
+      "command": "latexmk.exe",
+      "args": [
+        "-synctex=1",
+        "-interaction=nonstopmode",
+        "-file-line-error",
+        "-pdf",
+        "%DOC%"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "latexmk (MiKTeX Windows)",
+      "tools": [
+        "latexmk (MiKTeX Windows)"
+      ]
+    }
+  ],
+  "latex-workshop.latex.recipe.default": "latexmk (MiKTeX Windows)"
+}
