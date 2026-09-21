@@ -1,0 +1,46 @@
+%%-----------------------------------------------
+%% Cargar datos del proyecto:
+\input{secciones/_DatosProyecto}
+
+%%-----------------------------------------------
+%% Importar Preámbulo:
+\input{include/Preambulo}
+
+
+%%-----------------------------------------------
+%% Documento:
+\begin{document}
+
+\input{include/Portada}
+
+%%-----------------------------------------------
+%% Numeración romana:
+\pagenumbering{roman}
+
+%%-----------------------------------------------
+% \input{secciones/00_Resumen}
+\tableofcontents
+
+%%-----------------------------------------------
+%% Numeración arábiga:
+\pagenumbering{arabic}
+
+%%-----------------------------------------------
+\input{secciones/00_Resumen}
+\input{secciones/01_Introduccion}
+\input{secciones/02_TrabajoArte}
+\input{secciones/03_Desarrollo}
+% Secciones adicionales del proyecto
+\input{secciones/07_Impacto}
+\input{secciones/08_Resultados}
+
+\printbibliography[heading=bibintoc]
+
+%%-----------------------------------------------
+%% Anexos
+\appendix
+\clearpage
+%\addcontentsline{toc}{chapter}{\annexname}
+\input{secciones/09_Anexos}
+%%-----------------------------------------------
+\end{document}
