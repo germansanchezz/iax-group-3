@@ -64,6 +64,28 @@
 \usepackage{dcolumn}
 \newcolumntype{.}{D{.}{\esperiod}{-1}}
 \makeatletter
+\renewcommand{\@makechapterhead}[1]{%
+  \vspace*{20\p@}%
+  {\parindent \z@ \raggedright \normalfont
+    \ifnum \c@secnumdepth >\m@ne
+      \if@mainmatter
+        \huge\bfseries \@chapapp\space \thechapter
+        \par\nobreak
+        \vskip 20\p@
+      \fi
+    \fi
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
+\renewcommand{\@makeschapterhead}[1]{%
+  \vspace*{20\p@}%
+  {\parindent \z@ \raggedright
+    \normalfont
+    \interlinepenalty\@M
+    \Huge \bfseries #1\par\nobreak
+    \vskip 40\p@
+  }}
 \addto\shorthandsspanish{\let\esperiod\es@period@code}
 \makeatother
 %%-----------------------------------------------

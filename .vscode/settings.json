@@ -1,9 +1,8 @@
-// Requiere que latexmk.exe este disponible en el PATH del sistema.
 {
   "latex-workshop.latex.tools": [
     {
-      "name": "latexmk (MiKTeX Windows)",
-      "command": "latexmk.exe",
+      "name": "latexmk (Linux/WSL)",
+      "command": "latexmk",
       "args": [
         "-synctex=1",
         "-interaction=nonstopmode",
@@ -15,9 +14,9 @@
   ],
   "latex-workshop.latex.recipes": [
     {
-      "name": "latexmk (MiKTeX Windows)",
+      "name": "latexmk (Linux/WSL)",
       "tools": [
-        "latexmk (MiKTeX Windows)"
+        "latexmk (Linux/WSL)"
       ]
     }
   ],
