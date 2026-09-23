@@ -3,12 +3,23 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Sección 1} \label{sct:intro:s1}
+\section{Problema y objetivo}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+El objetivo del proyecto es predecir si un cliente tendrá dificultades de pago
+el mes siguiente, variable \texttt{payment_difficulty_next_month}. Esta entrega
+corresponde a la Phase I del statement y se limita deliberadamente al modelo
+lógico: un árbol de decisión. Por tanto, el propósito no es únicamente obtener
+una predicción, sino producir reglas que permitan entender qué perfiles son
+asignados a cada clase y justificar el compromiso entre rendimiento y
+legibilidad.
 
-\section{Sección 2} \label{sct:intro:s2}
+El análisis se realiza sobre el conjunto de entrenamiento, que contiene
+25\,000 observaciones y 15 predictores. El conjunto de test se reserva para la
+entrega final y no interviene en el desarrollo de esta fase. Dado que la clase
+positiva es minoritaria, la evaluación debe considerar el comportamiento del
+modelo en ambas clases.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+El informe describe la preparación de los datos, la selección del árbol, sus
+resultados y las explicaciones globales y locales. La interpretación se centra
+en el comportamiento aprendido por el modelo, sin atribuir efectos causales a
+las variables.

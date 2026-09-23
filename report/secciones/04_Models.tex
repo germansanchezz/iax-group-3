@@ -3,12 +3,43 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Sección 1} \label{sct:models:s1}
+\section{Interpretación global del árbol}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+El árbol final tiene profundidad máxima seis y exige al menos 200 observaciones
+por hoja. Su comportamiento se apoya principalmente en información de
+comportamiento de pago: \texttt{payment_to_bill_ratio_6m} y
+\texttt{latest_repayment_status}. \texttt{repayment_assistance_plan} y \texttt{age} completan el
+subconjunto seleccionado. Esta ordenación se obtuvo mediante la importancia
+basada en impureza y la estructura del árbol, por lo que describe el uso que el
+modelo hace de las variables, no una relación causal.
 
-\section{Sección 2} \label{sct:models:s2}
+La raíz y los niveles superiores separan primero regiones con perfiles de
+ratio de pago y estado de devolución distintos. Las hojas terminales asignan
+la clase mayoritaria de las observaciones que alcanzan cada región y usan su
+frecuencia de clase 1 como probabilidad estimada. Así, el modelo puede leerse
+como una colección de reglas: una observación sigue una secuencia de
+condiciones hasta una hoja y recibe la probabilidad de dificultad observada en
+esa hoja. El tamaño mínimo de hoja evita que una regla describa únicamente a
+unos pocos clientes.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Debe tenerse especial cuidado con \texttt{repayment_assistance_plan}. Su presencia
+puede reflejar que el prestamista ya había observado señales de tensión
+financiera. Por ello, que el árbol asocie esa categoría con mayor riesgo no
+permite concluir que el plan cause la dificultad posterior.
+
+\section{Explicaciones locales}
+
+Se conservaron dos observaciones correctamente clasificadas mediante
+predicciones out-of-fold, una de cada clase. Para `CR26-108758`, cuya clase
+real es 1, el árbol estima una probabilidad de aproximadamente 0.448 y la
+clasifica como dificultad. Para `CR26-103896`, cuya clase real es 0, estima una
+probabilidad de clase 1 de aproximadamente 0.094 y la clasifica como ausencia
+de dificultad.
+
+La explicación de cada caso es su camino desde la raíz hasta la hoja terminal:
+las condiciones sobre las cuatro variables seleccionadas se combinan, y la
+probabilidad de la hoja resume la proporción de casos positivos en esa región.
+Esta forma de explicación es directamente verificable y adecuada para un
+modelo lógico, aunque no implica que cada condición aislada sea suficiente ni
+causal. Los mismos casos se utilizarán con logística y EBM en la entrega final
+para comparar explicaciones, tal como exige el statement para Phase II.

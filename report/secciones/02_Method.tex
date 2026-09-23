@@ -3,12 +3,52 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Sección 1} \label{sct:method:s1}
+\section{Preparación de los datos}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Se separó \texttt{row_id} de los predictores y de la variable objetivo. Las
+variables categóricas se transformaron con \texttt{OneHotEncoder} dentro de un
+flujo de modelado; las numéricas se mantuvieron sin escalado. El conjunto de
+test no se utilizó durante el desarrollo.
 
-\section{Sección 2} \label{sct:method:s2}
+La evaluación empleó validación cruzada estratificada de cinco particiones,
+manteniendo aproximadamente la misma proporción de clases en cada una. Se
+registraron accuracy, balanced accuracy, F1 y ROC-AUC. La ROC-AUC se utilizó
+para comparar configuraciones sin depender de un umbral concreto.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Algoritmo de clasificación}
+
+Se utilizó un árbol de decisión CART para clasificación, implementado mediante
+\texttt{DecisionTreeClassifier} de \texttt{scikit-learn}. CART construye el
+modelo mediante particiones binarias sucesivas: en cada nodo selecciona una
+variable y un umbral que separan las observaciones en dos ramas. El criterio
+utilizado fue Gini, que es la configuración por defecto del clasificador y
+mide la impureza de cada partición. Este algoritmo resulta adecuado para la
+Phase I porque sus decisiones pueden expresarse directamente como reglas y no
+requiere escalar las variables numéricas.
+
+\section{Selección del árbol}
+
+Como referencia se ajustó primero un árbol sin restricciones. Su rendimiento de
+entrenamiento fue casi perfecto, pero su ROC-AUC media en validación cruzada
+fue aproximadamente 0.595 y produjo 8\,911 nodos y 4\,456 hojas. Esto indica
+que la complejidad no representa una mejora generalizable.
+
+A continuación se exploraron distintas profundidades y tamaños mínimos de
+hoja. Se eligió la combinación \texttt{max_depth=6} y
+\texttt{min_samples_leaf=200}, que ofreció un rendimiento cercano al mejor
+valor y un árbol más sencillo de interpretar.
+
+Con la complejidad fijada se hizo selección forward de predictores. Se añadió
+en cada paso la variable que más mejoraba la ROC-AUC y se escogió el menor
+subconjunto cuyo resultado quedaba dentro de un error estándar del mejor. El
+procedimiento retuvo cuatro variables:
+\texttt{payment_to_bill_ratio_6m}, \texttt{latest_repayment_status},
+\texttt{repayment_assistance_plan} y \texttt{age}. La estimación de esta selección es
+ligeramente optimista porque selección y evaluación comparten los folds.
+
+\section{Umbral y explicaciones locales}
+
+Después de fijar la configuración, el árbol se reentrenó con el conjunto de
+entrenamiento. El umbral se eligió a partir de predicciones out-of-fold,
+buscando maximizar la balanced accuracy. Para las explicaciones locales se
+seleccionó un caso correctamente clasificado de cada clase.

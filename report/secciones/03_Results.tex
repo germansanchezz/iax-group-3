@@ -3,12 +3,44 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Sección 1} \label{sct:results:s1}
+\section{Resumen de la evaluación}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+La tabla resume el único estimador requerido en esta entrega. Las métricas OOF
+se obtuvieron con una predicción out-of-fold por observación; el ROC-AUC es la
+media de los cinco folds del ajuste final.
 
-\section{Sección 2} \label{sct:results:s2}
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{0.24\linewidth} p{0.35\linewidth} p{0.28\linewidth}}
+\hline
+Clasificador & Configuración principal & Resultado de validación cruzada \\
+\hline
+DecisionTreeClassifier &
+\texttt{max_depth=6}, \texttt{min_samples_leaf=200}; 4 predictores por forward selection; umbral 0.22 &
+Accuracy OOF = 0.731; balanced accuracy OOF = 0.694; F1 OOF = 0.404; ROC-AUC CV = 0.758 (desv. aprox. 0.02) \\
+\hline
+\end{tabular}
+\caption{Resultado del modelo lógico de Phase I.}
+\label{tab:phase1-results}
+\end{table}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+La accuracy del modelo a umbral 0.5 es 0.809, pero el recall de la clase 1 es
+solo 0.230. La elección de 0.22 reduce la accuracy al aceptar más falsas
+alarmas, pero aumenta la detección de dificultades a recall 0.630. En este
+problema, donde omitir un cliente con dificultad puede ser más costoso que
+revisar un caso adicional, la balanced accuracy es un criterio más informativo.
+
+\section{Complejidad y selección de variables}
+
+El árbol irrestricto alcanzó casi ajuste perfecto sobre entrenamiento, pero
+generalizó mal: ROC-AUC media de aproximadamente 0.595 y una estructura de
+8\,911 nodos. Limitar la profundidad y el tamaño mínimo de hoja produjo un
+modelo que conserva capacidad predictiva y permite inspeccionar sus decisiones.
+
+El subconjunto seleccionado alcanzó ROC-AUC media aproximada de 0.758, frente a
+0.756 del modelo con los 15 predictores. La diferencia es pequeña, pero el
+modelo reducido es preferible para esta entrega porque concentra la
+explicación en cuatro variables y evita presentar splits que no aportan
+evidencia adicional de generalización.
+
