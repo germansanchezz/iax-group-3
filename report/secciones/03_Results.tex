@@ -25,22 +25,94 @@ Accuracy OOF = 0.731; balanced accuracy OOF = 0.694; F1 OOF = 0.404; ROC-AUC CV 
 \label{tab:phase1-results}
 \end{table}
 
+\section{Complejidad y selección de variables}
+
+El árbol irrestricto alcanzó casi ajuste perfecto sobre entrenamiento (ROC-AUC
+aproximada de 1.000), pero generalizó mal con un ROC-AUC media de aproximadamente
+0.595 y una estructura de 8\,911 nodos y 4\,456 hojas. 
+
+La figura
+\ref{fig:tree-train-cv} muestra la separación entre entrenamiento y validación.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/tree_train_vs_cv_roc_auc.png}
+\caption{ROC-AUC de entrenamiento y de validación cruzada frente a la
+profundidad máxima del árbol.}
+\label{fig:tree-train-cv}
+\end{figure}
+
+Para fijar la complejidad se exploraron profundidades de 1 a 15. Observamos en \ref{fig:tree-train-cv} que el rendimiento
+mejora hasta profundidad 5--6 y de ahí en adelante comienza a degradar, mientras que el
+número de hojas crece de forma acelerada (figuras
+\ref{fig:tree-depth-performance} y \ref{fig:tree-depth-leaves}). La mejor
+ROC-AUC media se obtuvo con \texttt{max_depth=6}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/tree_depth_performance.png}
+\caption{Métricas de validación cruzada frente a la profundidad máxima.}
+\label{fig:tree-depth-performance}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/tree_depth_leaves.png}
+\caption{Número de hojas del árbol frente a su profundidad máxima.}
+\label{fig:tree-depth-leaves}
+\end{figure}
+
+A continuación, se probaron tamaños mínimos de hoja de 1, 10, 25, 50,
+100, 200 y 500 con profundidades de 3 a 6. 
+
+Analizando la figura \ref{fig:tree-min-leaf}, el mejor valor fue 100, pero
+200 mantuvo una ROC-AUC similar  con un árbol más sencillo y mejor balanced
+accuracy y F1.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/tree_min_leaf_roc_auc.png}
+\caption{ROC-AUC de validación cruzada frente al tamaño mínimo de hoja, para
+distintas profundidades.}
+\label{fig:tree-min-leaf}
+\end{figure}
+
+Finalmente, se tomó la decisión de eligir \texttt{max_depth=6} y \texttt{min_samples_leaf=200}, y 
+con estos parámetros fijos se procedió a la selección forward de predictores, añadiendo en
+cada paso la variable que más mejoraba la ROC-AUC y escogiendo el menor
+subconjunto dentro de un error estándar del mejor (figura
+\ref{fig:forward-selection}). El subconjunto retenido alcanzó ROC-AUC media
+aproximada de 0.758, frente a 0.756 del modelo con los 15 predictores. La
+diferencia es pequeña, pero el modelo reducido es preferible para esta entrega
+porque al concentrar la explicación en cuatro variables, evita presentar splits que
+no aportan evidencia adicional de generalización. Cabe destacar que la estimación es ligeramente
+optimista porque selección y evaluación comparten los folds.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/forward_selection.png}
+\caption{Selección forward de predictores mediante validación cruzada, con la
+banda de un error estándar del modelo completo y el subconjunto elegido.}
+\label{fig:forward-selection}
+\end{figure}
+
+\section{Umbral de clasificación}
+
+Después de fijar la configuración y las variables, el árbol se reentrenó con el conjunto de
+entrenamiento. El umbral se eligió a partir de predicciones out-of-fold,
+buscando maximizar la balanced accuracy.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.8\textwidth]{images/threshold-selection.png}
+\caption{Selección del umbral de clasificación mediante validación cruzada, con la
+banda de un error estándar del modelo completo y el subconjunto elegido.}
+\label{fig:threshold-selection}
+\end{figure}
+
 La accuracy del modelo a umbral 0.5 es 0.809, pero el recall de la clase 1 es
 solo 0.230. La elección de 0.22 reduce la accuracy al aceptar más falsas
 alarmas, pero aumenta la detección de dificultades a recall 0.630. En este
 problema, donde omitir un cliente con dificultad puede ser más costoso que
 revisar un caso adicional, la balanced accuracy es un criterio más informativo.
-
-\section{Complejidad y selección de variables}
-
-El árbol irrestricto alcanzó casi ajuste perfecto sobre entrenamiento, pero
-generalizó mal: ROC-AUC media de aproximadamente 0.595 y una estructura de
-8\,911 nodos. Limitar la profundidad y el tamaño mínimo de hoja produjo un
-modelo que conserva capacidad predictiva y permite inspeccionar sus decisiones.
-
-El subconjunto seleccionado alcanzó ROC-AUC media aproximada de 0.758, frente a
-0.756 del modelo con los 15 predictores. La diferencia es pequeña, pero el
-modelo reducido es preferible para esta entrega porque concentra la
-explicación en cuatro variables y evita presentar splits que no aportan
-evidencia adicional de generalización.
 

@@ -28,24 +28,22 @@ requiere escalar las variables numéricas.
 
 \section{Selección del árbol}
 
-Como referencia se ajustó primero un árbol sin restricciones. Su rendimiento de
-entrenamiento fue casi perfecto, pero su ROC-AUC media en validación cruzada
-fue aproximadamente 0.595 y produjo 8\,911 nodos y 4\,456 hojas. Esto indica
-que la complejidad no representa una mejora generalizable.
+Como referencia se ajustó primero un árbol sin restricciones. 
 
-A continuación se exploraron distintas profundidades y tamaños mínimos de
-hoja. Se eligió la combinación \texttt{max_depth=6} y
-\texttt{min_samples_leaf=200}, que ofreció un rendimiento cercano al mejor
-valor y un árbol más sencillo de interpretar.
+%Su rendimiento de entrenamiento fue casi perfecto, pero su ROC-AUC media en validación cruzada fue aproximadamente 0.595 y produjo 8\,911 nodos y 4\,456 hojas. Esto indica que la complejidad no representa una mejora generalizable.
+
+A continuación se exploraron distintas profundidades (1-15) y tamaños mínimos de
+hoja (1, 10, 25, 50, 100, 200, 500). 
+
+%Se eligió la combinación \texttt{max_depth=6} y \texttt{min_samples_leaf=200}, que ofreció un rendimiento cercano al mejor valor y un árbol más sencillo de interpretar.
 
 Con la complejidad fijada se hizo selección forward de predictores. Se añadió
 en cada paso la variable que más mejoraba la ROC-AUC y se escogió el menor
 subconjunto cuyo resultado quedaba dentro de un error estándar del mejor. El
-procedimiento retuvo cuatro variables:
-\texttt{payment_to_bill_ratio_6m}, \texttt{latest_repayment_status},
-\texttt{repayment_assistance_plan} y \texttt{age}. La estimación de esta selección es
+procedimiento retuvo cuatro variables. Cabe destacar que la  estimación de esta selección es 
 ligeramente optimista porque selección y evaluación comparten los folds.
 
+%\texttt{payment_to_bill_ratio_6m}, \texttt{latest_repayment_status}, \texttt{repayment_assistance_plan} y \texttt{age}. 
 \section{Umbral y explicaciones locales}
 
 Después de fijar la configuración, el árbol se reentrenó con el conjunto de
