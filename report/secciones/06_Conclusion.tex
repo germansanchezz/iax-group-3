@@ -5,20 +5,19 @@
 
 La Phase I construye un modelo lógico para predecir \texttt{payment_difficulty_next_month}
 con un árbol de decisión interpretable. La validación cruzada mostró que el
-árbol irrestricto sobreajusta; limitarlo a profundidad seis y 200 observaciones
-por hoja, y conservar cuatro predictores, produce un compromiso más útil entre
-generalización y legibilidad. La ROC-AUC media es aproximadamente 0.758 y el
-modelo identifica mejor la clase minoritaria cuando se usa el umbral 0.22.
+árbol irrestricto sobreajusta; limitarlo a profundidad dos y 200 observaciones
+por hoja, y conservar dos predictores, produce un compromiso más útil entre
+generalización y legibilidad. La ROC-AUC media es aproximadamente 0.724 y el
+modelo identifica mejor la clase minoritaria cuando se usa el umbral 0.09, con
+una balanced accuracy out-of-fold de 0.657 y un recall de 0.846 para la clase 1.
 
-Las reglas aprendidas se apoyan principalmente en el comportamiento reciente de
-pago, junto con el plan de asistencia y la edad. Las explicaciones globales y
-locales permiten rastrear cada predicción hasta una hoja, pero deben entenderse
-como asociaciones predictivas. En particular, la asistencia de reembolso no
-puede interpretarse como causa de la dificultad.
+Las reglas aprendidas se apoyan únicamente en el comportamiento reciente de
+pago: \texttt{latest_repayment_status} y \texttt{payment_to_bill_ratio_6m}.
+Las explicaciones globales y locales permiten rastrear cada predicción hasta una
+hoja, pero deben entenderse como asociaciones predictivas y no causales.
 
 Para Phase II quedan pendientes la regresión logística y el Explainable
 Boosting Machine, la comparación de sus explicaciones sobre las mismas
-observaciones y la generación de predicciones para `test.csv`. También será
-necesario revisar la selección del umbral conforme a los costes de error que se
-definan para la entrega final.
-
+observaciones y la generación de predicciones para \texttt{test.csv}. También
+será necesario revisar la selección del umbral conforme a los costes de error
+que se definan para la entrega final.

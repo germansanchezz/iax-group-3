@@ -10,8 +10,8 @@ variables categóricas se transformaron con \texttt{OneHotEncoder} dentro de un
 flujo de modelado; las numéricas se mantuvieron sin escalado. El conjunto de
 test no se utilizó durante el desarrollo.
 
-La evaluación empleó validación cruzada estratificada de cinco particiones,
-manteniendo aproximadamente la misma proporción de clases en cada una. Se
+La evaluación empleó 5-fold stratified cross-validation, manteniendo
+aproximadamente la misma proporción de clases en cada fold. Se
 registraron accuracy, balanced accuracy, F1 y ROC-AUC. La ROC-AUC se utilizó
 para comparar configuraciones sin depender de un umbral concreto.
 
@@ -19,31 +19,40 @@ para comparar configuraciones sin depender de un umbral concreto.
 
 Se utilizó un árbol de decisión CART para clasificación, implementado mediante
 \texttt{DecisionTreeClassifier} de \texttt{scikit-learn}. CART construye el
-modelo mediante particiones binarias sucesivas: en cada nodo selecciona una
+modelo mediante particiones binarias sucesivas, en cada nodo selecciona una
 variable y un umbral que separan las observaciones en dos ramas. El criterio
 utilizado fue Gini, que es la configuración por defecto del clasificador y
 mide la impureza de cada partición. Este algoritmo resulta adecuado para la
 Phase I porque sus decisiones pueden expresarse directamente como reglas y no
 requiere escalar las variables numéricas.
 
-\section{Selección del árbol}
+Se optó por CART y no por un Generalized Optimal Sparse Decision Tree (GOSDT).
+Aunque GOSDT busca árboles óptimos y dispersos, está pensado para variables
+discretas, mientras que este problema incluye predictores numéricos.
 
-Como referencia se ajustó primero un árbol sin restricciones. 
+\section{Selección de la complejidad}
 
-%Su rendimiento de entrenamiento fue casi perfecto, pero su ROC-AUC media en validación cruzada fue aproximadamente 0.595 y produjo 8\,911 nodos y 4\,456 hojas. Esto indica que la complejidad no representa una mejora generalizable.
+Como referencia se ajustó primero un árbol sin restricciones.
 
-A continuación se exploraron distintas profundidades (1-15) y tamaños mínimos de
-hoja (1, 10, 25, 50, 100, 200, 500). 
+A continuación se exploraron distintas profundidades máximas y tamaños mínimos
+de hoja, con el objetivo de identificar un compromiso razonable entre rendimiento
+predictivo e interpretabilidad. En concreto, se recorrió un rango de
+profundidades y varios tamaños mínimos de hoja, comparando las métricas de
+validación cruzada con el tamaño resultante del árbol. La selección prioriza
+estructuras simples cuando su rendimiento es comparable al de alternativas más
+complejas.
 
-%Se eligió la combinación \texttt{max_depth=6} y \texttt{min_samples_leaf=200}, que ofreció un rendimiento cercano al mejor valor y un árbol más sencillo de interpretar.
+\section{Selección de variables}
 
-Con la complejidad fijada se hizo selección forward de predictores. Se añadió
-en cada paso la variable que más mejoraba la ROC-AUC y se escogió el menor
-subconjunto cuyo resultado quedaba dentro de un error estándar del mejor. El
-procedimiento retuvo cuatro variables. Cabe destacar que la  estimación de esta selección es 
-ligeramente optimista porque selección y evaluación comparten los folds.
+Con la complejidad fijada se realizó una selección forward de predictores,
+partiendo de un conjunto vacío. En cada paso se añadió la variable que más
+mejoraba la ROC-AUC media y se escogió el menor subconjunto cuyo resultado
+quedaba dentro de un error estándar del mejor. Cada candidato se evaluó con el
+mismo 5-fold stratified cross-validation, ajustando el preprocesado dentro de
+cada fold para evitar usar datos de validación. Cabe destacar que la estimación
+de esta selección es ligeramente optimista porque selección y evaluación
+comparten los folds.
 
-%\texttt{payment_to_bill_ratio_6m}, \texttt{latest_repayment_status}, \texttt{repayment_assistance_plan} y \texttt{age}. 
 \section{Umbral y explicaciones locales}
 
 Después de fijar la configuración, el árbol se reentrenó con el conjunto de

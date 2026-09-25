@@ -5,10 +5,19 @@
 
 \section{Rendimiento frente a interpretabilidad}
 
-El árbol irrestricto casi memoriza el entrenamiento y produce miles de hojas,
-por lo que no es adecuado para explicar decisiones. El árbol final ofrece un
-compromiso más útil: conserva un rendimiento similar al modelo con todas las
-variables y resulta mucho más fácil de inspeccionar.
+El árbol irrestricto memoriza el entrenamiento y produce miles de hojas
+(ROC-AUC de entrenamiento de 1.000 frente a 0.595 en validación cruzada, con
+8\,911 nodos y 4\,456 hojas), por lo que no es adecuado para explicar decisiones.
+
+Entre los árboles restringidos, la profundidad 6 maximizó el ROC-AUC medio
+(0.7532), pero la profundidad 2 maximizó la balanced accuracy (0.6496) y el F1
+(0.4515). Se eligió la profundidad 2 para priorizar la interpretabilidad: el
+árbol final tiene 7 nodos y 4 hojas, con un ROC-AUC de 0.7237. La selección
+forward redujo además los predictores de 15 a dos sin pérdida de ROC-AUC
+(0.7237 en ambos casos), de modo que el compromiso entre rendimiento y
+legibilidad se resuelve con una estructura muy compacta. En esta profundidad,
+\texttt{min_samples_leaf} no llega a activarse, por lo que la complejidad final
+la determina únicamente la profundidad.
 
 La selección de variables favorece una explicación breve, aunque variables
 correlacionadas podrían producir subconjuntos diferentes. Además, la selección
@@ -17,10 +26,15 @@ considerarse una estimación de desarrollo.
 
 \section{Limitaciones}
 
-El umbral elegido mejora la detección de dificultades a costa de más falsas
-alarmas. Su conveniencia depende del coste relativo de ambos errores y debería
-revisarse antes de un uso operativo.
+Se optó por CART en lugar de un árbol óptimo y disperso (GOSDT) porque este
+último está pensado para variables discretas, mientras que el problema incluye
+predictores numéricos.
+
+El umbral elegido (0.09) mejora la detección de dificultades a costa de más
+falsas alarmas. Su conveniencia depende del coste relativo de ambos errores y
+debería revisarse antes de un uso operativo.
 
 Por último, las reglas describen asociaciones del predictor, no causas del
-impago. Esto es especialmente relevante para la asistencia de reembolso, que
-puede reflejar información previa sobre la situación del cliente.
+impago. Las variables retenidas resumen comportamiento de pago reciente y pueden
+reflejar información previa sobre la situación del cliente, por lo que no debe
+atribuírseles un efecto causal.

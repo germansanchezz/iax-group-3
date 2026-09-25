@@ -5,9 +5,9 @@
 
 \section{Resumen de la evaluación}
 
-La tabla resume el único estimador requerido en esta entrega. Las métricas OOF
-se obtuvieron con una predicción out-of-fold por observación; el ROC-AUC es la
-media de los cinco folds del ajuste final.
+La tabla resume el modelo lógico de esta entrega y sus métricas. Las métricas
+OOF se obtuvieron con una predicción out-of-fold por observación; el ROC-AUC es
+la media de los cinco folds del ajuste final.
 
 \begin{table}[H]
 \centering
@@ -17,8 +17,10 @@ media de los cinco folds del ajuste final.
 Clasificador & Configuración principal & Resultado de validación cruzada \\
 \hline
 DecisionTreeClassifier &
-\texttt{max_depth=6}, \texttt{min_samples_leaf=200}; 4 predictores por forward selection; umbral 0.22 &
-Accuracy OOF = 0.731; balanced accuracy OOF = 0.694; F1 OOF = 0.404; ROC-AUC CV = 0.758 (desv. aprox. 0.02) \\
+\texttt{max_depth=2}, \texttt{min_samples_leaf=200}; 2 predictores por
+forward selection; umbral 0.09 &
+Accuracy OOF = 0.548; balanced accuracy OOF = 0.657; F1 OOF = 0.443; ROC-AUC CV
+= 0.7237 (desv. 0.0069) \\
 \hline
 \end{tabular}
 \caption{Resultado del modelo lógico de Phase I.}
@@ -28,69 +30,79 @@ Accuracy OOF = 0.731; balanced accuracy OOF = 0.694; F1 OOF = 0.404; ROC-AUC CV 
 \section{Complejidad y selección de variables}
 
 El árbol irrestricto alcanzó casi ajuste perfecto sobre entrenamiento (ROC-AUC
-aproximada de 1.000), pero generalizó mal con un ROC-AUC media de aproximadamente
-0.595 y una estructura de 8\,911 nodos y 4\,456 hojas. 
+aproximada de 1.000), pero generalizó mal con un ROC-AUC medio de 0.595 y una
+estructura de 8\,911 nodos, 4\,456 hojas y profundidad 40.
 
-La figura
-\ref{fig:tree-train-cv} muestra la separación entre entrenamiento y validación.
+La figura \ref{fig:tree-train-cv} muestra la separación entre entrenamiento y
+validación según el árbol tiene cada vez más hojas.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/tree_train_vs_cv_roc_auc.png}
+\includegraphics[width=0.75\textwidth]{images/figure_04.png}
 \caption{ROC-AUC de entrenamiento y de validación cruzada frente a la
 profundidad máxima del árbol.}
 \label{fig:tree-train-cv}
 \end{figure}
 
-Para fijar la complejidad se exploraron profundidades de 1 a 15. Observamos en \ref{fig:tree-train-cv} que el rendimiento
-mejora hasta profundidad 5--6 y de ahí en adelante comienza a degradar, mientras que el
-número de hojas crece de forma acelerada (figuras
-\ref{fig:tree-depth-performance} y \ref{fig:tree-depth-leaves}). La mejor
-ROC-AUC media se obtuvo con \texttt{max_depth=6}.
+Para fijar la complejidad se exploraron profundidades de 1 a 15 (figuras
+\ref{fig:tree-depth-performance} y \ref{fig:tree-depth-leaves}). El mejor
+ROC-AUC medio se obtuvo con \texttt{max_depth=6} (0.7532), pero la mayor
+balanced accuracy (0.6496) y el mayor F1 (0.4515) se obtuvieron con
+\texttt{max_depth=2}. Se eligió \texttt{max_depth=2} para priorizar la
+interpretabilidad, haciendo que el árbol resultante tenga 7 nodos y 4 hojas, con una accuracy media de 0.7986, balanced accuracy de 0.6496, F1 de 0.4515 y ROC-AUC de 0.7237.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/tree_depth_performance.png}
+\includegraphics[width=0.75\textwidth]{images/figure_03.png}
 \caption{Métricas de validación cruzada frente a la profundidad máxima.}
 \label{fig:tree-depth-performance}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/tree_depth_leaves.png}
+\includegraphics[width=0.75\textwidth]{images/figure_05.png}
 \caption{Número de hojas del árbol frente a su profundidad máxima.}
 \label{fig:tree-depth-leaves}
 \end{figure}
 
-A continuación, se probaron tamaños mínimos de hoja de 1, 10, 25, 50,
-100, 200 y 500 con profundidades de 3 a 6. 
+La figura \ref{fig:tree-depth-leaves} muestra que el número de hojas crece de
+forma aproximadamente geométrica con la profundidad. Se pasa de 4 hojas con
+profundidad 2 a 63 con profundidad 6 y a más de 1\,400 con profundidad 15. Como
+cada hoja corresponde a una regla, este crecimiento acelerado hace que las
+profundidades mayores sean cada vez más difíciles de inspeccionar, lo que
+refuerza la elección de una estructura compacta de dos niveles.
 
-Analizando la figura \ref{fig:tree-min-leaf}, el mejor valor fue 100, pero
-200 mantuvo una ROC-AUC similar  con un árbol más sencillo y mejor balanced
-accuracy y F1.
+A continuación, se probaron tamaños mínimos de hoja de 1, 10, 25, 50, 100, 200 y
+500 con profundidades de 2 a 6 (figura \ref{fig:tree-min-leaf}). En las
+profundidades mayores el parámetro sí modifica ligeramente las métricas y la
+estructura, pero para la profundidad seleccionada todos los valores produjeron
+las mismas métricas y el mismo árbol de 7 nodos y 4 hojas. Con solo dos niveles,
+la hoja más pequeña contiene alrededor de 1\,800 observaciones, de modo que la
+restricción nunca llega a activarse: \texttt{min_samples_leaf} no es un
+hiperparámetro relevante en este modelo y se fija en 200 de forma nominal, sin
+que ello altere el árbol final.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/tree_min_leaf_roc_auc.png}
+\includegraphics[width=0.75\textwidth]{images/figure_06.png}
 \caption{ROC-AUC de validación cruzada frente al tamaño mínimo de hoja, para
 distintas profundidades.}
 \label{fig:tree-min-leaf}
 \end{figure}
 
-Finalmente, se tomó la decisión de eligir \texttt{max_depth=6} y \texttt{min_samples_leaf=200}, y 
-con estos parámetros fijos se procedió a la selección forward de predictores, añadiendo en
-cada paso la variable que más mejoraba la ROC-AUC y escogiendo el menor
-subconjunto dentro de un error estándar del mejor (figura
-\ref{fig:forward-selection}). El subconjunto retenido alcanzó ROC-AUC media
-aproximada de 0.758, frente a 0.756 del modelo con los 15 predictores. La
-diferencia es pequeña, pero el modelo reducido es preferible para esta entrega
-porque al concentrar la explicación en cuatro variables, evita presentar splits que
-no aportan evidencia adicional de generalización. Cabe destacar que la estimación es ligeramente
-optimista porque selección y evaluación comparten los folds.
+Con la complejidad fijada se procedió a la selección forward de predictores,
+añadiendo en cada paso la variable que más mejoraba la ROC-AUC y escogiendo el
+menor subconjunto dentro de un error estándar del mejor (figura
+\ref{fig:forward-selection}). El modelo completo con los 15 predictores alcanzó
+un ROC-AUC medio de 0.7237 (EE 0.0028), y el subconjunto retenido fue de dos
+variables: \texttt{latest_repayment_status} y \texttt{payment_to_bill_ratio_6m}.
+El árbol final con estas dos variables mantiene 7 nodos y 4 hojas. Cabe
+destacar que la estimación es ligeramente optimista porque selección y
+evaluación comparten los folds.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/forward_selection.png}
+\includegraphics[width=0.75\textwidth]{images/figure_07.png}
 \caption{Selección forward de predictores mediante validación cruzada, con la
 banda de un error estándar del modelo completo y el subconjunto elegido.}
 \label{fig:forward-selection}
@@ -98,21 +110,38 @@ banda de un error estándar del modelo completo y el subconjunto elegido.}
 
 \section{Umbral de clasificación}
 
-Después de fijar la configuración y las variables, el árbol se reentrenó con el conjunto de
-entrenamiento. El umbral se eligió a partir de predicciones out-of-fold,
-buscando maximizar la balanced accuracy.
+El umbral se eligió a partir de predicciones out-of-fold, buscando maximizar la
+balanced accuracy (figura \ref{fig:threshold-selection}). El valor seleccionado
+fue 0.09, con balanced accuracy OOF de 0.657, accuracy de 0.548, precisión de
+0.300 y recall de 0.846 para la clase 1. El umbral que maximiza F1 es 0.22
+(F1 = 0.454), pero se priorizó la balanced accuracy por el desbalanceo de
+clases: en este problema, omitir un cliente con dificultad puede ser más costoso
+que revisar un caso adicional.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
-\includegraphics[width=0.6\textwidth]{images/threshold-selection.png}
-\caption{Selección del umbral de clasificación mediante validación cruzada, con la
-banda de un error estándar del modelo completo y el subconjunto elegido.}
+\includegraphics[width=0.75\textwidth]{images/figure_11.png}
+\caption{Selección del umbral de clasificación sobre predicciones out-of-fold,
+maximizando la balanced accuracy.}
 \label{fig:threshold-selection}
 \end{figure}
 
-La accuracy del modelo a umbral 0.5 es 0.809, pero el recall de la clase 1 es
-solo 0.230. La elección de 0.22 reduce la accuracy al aceptar más falsas
-alarmas, pero aumenta la detección de dificultades a recall 0.630. En este
-problema, donde omitir un cliente con dificultad puede ser más costoso que
-revisar un caso adicional, la balanced accuracy es un criterio más informativo.
+La figura \ref{fig:oof-probabilities} muestra la distribución de probabilidades
+out-of-fold por clase real, y la figura \ref{fig:oof-confusion} la matriz de
+confusión resultante con el umbral seleccionado.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{images/figure_12.png}
+\caption{Distribución de probabilidades out-of-fold por clase real, con el
+umbral seleccionado.}
+\label{fig:oof-probabilities}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.75\textwidth]{images/figure_13.png}
+\caption{Matriz de confusión de las predicciones out-of-fold con el umbral
+seleccionado.}
+\label{fig:oof-confusion}
+\end{figure}
