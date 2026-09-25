@@ -23,6 +23,14 @@
 \usepackage[stable]{footmisc}
 \usepackage{parskip} % para separar párrafos con espacio.
 
+% Ajuste del espaciado vertical: parskip por defecto se estira y deja
+% huecos grandes en páginas con figuras, así que se fija y se reduce el
+% espacio alrededor de los flotantes.
+\setlength{\parskip}{5pt}%
+\setlength{\intextsep}{7pt}%
+\setlength{\textfloatsep}{9pt}%
+\setlength{\floatsep}{9pt}%
+
 \usepackage{lscape}
 \usepackage{pgfgantt}
 
@@ -37,6 +45,7 @@
 % --- BIBLIOGRAPHY ---
 
 \usepackage{float}
+\usepackage{flafter} % evita que un flotante aparezca antes de su referencia
 \usepackage{subfigure}
 
 %%-----------------------------------------------
