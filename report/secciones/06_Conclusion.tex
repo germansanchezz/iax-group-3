@@ -1,23 +1,13 @@
-\chapter{Conclusión} \label{chp:conclusion}
+\section{Conclusión}\label{sec:conclusion}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+El proyecto se propuso predecir la dificultad de pago del mes siguiente con modelos que, además de discriminar, explicaran sus decisiones. Se compararon un árbol, una regresión logística y un EBM sobre las mismas cinco particiones externas agrupadas, con validación anidada, selección por ROC-AUC y umbral por exactitud equilibrada. Esa homogeneidad permite comparar las familias sin que el reparto las favorezca.
 
-La Phase I construye un modelo lógico para predecir \texttt{payment_difficulty_next_month}
-con un árbol de decisión interpretable. La validación cruzada mostró que el
-árbol irrestricto sobreajusta; limitarlo a profundidad dos y 200 observaciones
-por hoja, y conservar dos predictores, produce un compromiso más útil entre
-generalización y legibilidad. La ROC-AUC media es aproximadamente 0.724 y el
-modelo identifica mejor la clase minoritaria cuando se usa el umbral 0.09, con
-una balanced accuracy out-of-fold de 0.657 y un recall de 0.846 para la clase 1.
+El EBM obtuvo la mayor ROC-AUC ($0{,}7755 \pm 0{,}0077$) y la mejor exactitud equilibrada ($0{,}6997$ con umbral interno), seguido de la logística ($0{,}7515$) y del árbol ($0{,}7372$). La ventaja del EBM se repite en las cinco particiones, aunque el árbol conserva la mayor exactitud ($0{,}7793$) y precisión ($0{,}4805$). El umbral interno eleva la sensibilidad en más de $34$ puntos porcentuales, a costa de precisión y de exactitud, que cae por debajo de la referencia mayoritaria. No hay umbral neutro, porque fijarlo equivale a elegir qué error se tolera.
 
-Las reglas aprendidas se apoyan únicamente en el comportamiento reciente de
-pago: \texttt{latest_repayment_status} y \texttt{payment_to_bill_ratio_6m}.
-Las explicaciones globales y locales permiten rastrear cada predicción hasta una
-hoja, pero deben entenderse como asociaciones predictivas y no causales.
+El modelo final fue un EBM sin interacciones, con \var{max_bins}=32, $10$ observaciones mínimas por hoja y umbral $0{,}20$. Aplicado al test, asigna $3\,208$ casos a la clase 0 y $1\,792$ a la clase 1, y se guarda en \texttt{outputs/test.csv} conservando filas y valores originales; sin etiquetas no pueden calcularse métricas.
 
-Para Phase II quedan pendientes la regresión logística y el Explainable
-Boosting Machine, la comparación de sus explicaciones sobre las mismas
-observaciones y la generación de predicciones para \texttt{test.csv}. También
-será necesario revisar la selección del umbral conforme a los costes de error
-que se definan para la entrega final.
+La interpretabilidad no es una sola propiedad. Las reglas del árbol son inmediatas pero gruesas, los coeficientes de la logística compactos pero con referencias y escalas, y las funciones del EBM más fieles pero más costosas de inspeccionar. Una misma decisión no implica la misma explicación, y el umbral forma parte de ella.
+
+Los límites acotan las conclusiones. Los datos semisintéticos; entrenamientos solapados, no réplicas independientes; selección de familia con los mismos resultados, que puede introducir optimismo; y presupuestos de búsqueda distintos. No se demuestra causalidad, calibración, equidad ni generalización. Procede calibrar, repetir la validación, analizar el comportamiento por grupo, fijar umbrales sensibles a costes, documentar los códigos de las variables y evaluar con etiquetas externas.
+
+El valor del proyecto reside en combinar rendimiento y explicaciones fieles sin confundir asociación con causa.

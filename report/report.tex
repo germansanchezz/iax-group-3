@@ -1,47 +1,49 @@
-%%-----------------------------------------------
-%% Cargar datos del proyecto:
 \input{secciones/_DatosProyecto}
-
-%%-----------------------------------------------
-%% Importar Preámbulo:
 \input{include/Preambulo}
 
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{microtype}
 
-%%-----------------------------------------------
-%% Documento:
+\geometry{top=2.5cm,bottom=2.5cm,left=2.4cm,right=2.4cm}
+\setlength{\parskip}{3pt}
+\setlength{\intextsep}{7pt}
+\setlength{\textfloatsep}{9pt}
+\setlength{\floatsep}{9pt}
+
+\DeclareRobustCommand{\var}[1]{\path{#1}}
+
+\renewcommand{\thesection}{\arabic{section}}
+\renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\thesubsection.\arabic{subsubsection}}
+
+\addto\captionsspanish{%
+  \renewcommand{\tablename}{Tabla}%
+  \renewcommand{\figurename}{Figura}%
+}
+
 \begin{document}
-
+\raggedbottom 
 \input{include/Portada}
 
-%%-----------------------------------------------
-%% Numeración romana:
+% Índice general en numeración romana (materia preliminar).
 \pagenumbering{roman}
-
-%%-----------------------------------------------
-% \input{secciones/00_Resumen}
 \tableofcontents
+\clearpage
 
-%%-----------------------------------------------
-%% Numeración arábiga:
 \pagenumbering{arabic}
+\setcounter{page}{2}
 
-%%-----------------------------------------------
-\input{secciones/01_Introduction}
-\input{secciones/02_Method}
-\input{secciones/03_Results}
-\input{secciones/04_Models}
-\input{secciones/05_Discussion}
+\input{secciones/01_Introduccion}
+\input{secciones/02_Metodo}
+\input{secciones/03_Resultados}
+\input{secciones/04_Modelos}
+\input{secciones/05_Discusion}
 \input{secciones/06_Conclusion}
-% \input{secciones/07_References}
-\input{secciones/08_UseOfGenerativeAI}
+\input{secciones/07_Referencias}
+\input{secciones/08_UsoIA}
 
-% \printbibliography[heading=bibintoc]
-
-% %%-----------------------------------------------
-% %% Anexos
-% \appendix
-% \clearpage
-% %\addcontentsline{toc}{chapter}{\annexname}
-% \input{secciones/09_Anexos}
-% %%-----------------------------------------------
 \end{document}

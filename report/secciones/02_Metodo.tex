@@ -1,0 +1,44 @@
+\section{Método}\label{sec:method}
+
+El entrenamiento contiene 25\,000 observaciones y 15 predictores, 11 numéricos y 4 categóricos. La variable objetivo, \var{payment_difficulty_next_month}, es binaria y la clase positiva supone el 21,21\,\%; el test reservado tiene 5\,000 filas sin etiquetas. El preprocesamiento se ajusta dentro de cada entrenamiento y se aplica a su validación, mientras que el test permanece intacto hasta la predicción final. El árbol usa one-hot sin escalado, la logística estandariza las numéricas y usa one-hot con la primera categoría como referencia, para que la penalización no dependa de la escala; y el EBM conserva los valores originales y discretiza internamente.
+
+\subsection{Protocolo de evaluación}
+
+Las tres familias se comparan sobre las mismas cinco particiones externas, estratificadas y agrupadas por perfil idéntico de los 15 predictores, cada registro se valida una vez. El agrupamiento es necesario porque hay 31 perfiles repetidos y 13 con etiquetas distintas. Si las copias se repartieran entre entrenamiento y validación, la evaluación mediría en parte la memorización del perfil. Dentro de cada entrenamiento externo se ejecutan cinco particiones internas. La configuración se elige por ROC-AUC media interna y el umbral por exactitud equilibrada media interna, con una rejilla de 0,05 a 0,95 en pasos de 0,05; los empates se resuelven hacia el valor más cercano a 0,5 y después hacia el menor.
+
+El anidamiento evita el optimismo de elegir configuración y umbral con los mismos datos usados para informar el rendimiento; la partición externa no participa en esas decisiones. Se informan ROC-AUC, exactitud, exactitud equilibrada, sensibilidad, precisión y F1, con la clase 1 como positiva. La referencia mayoritaria siempre predice 0, con exactitud $0{,}7879 \pm 0{,}0052$, ROC-AUC y exactitud equilibrada 0,5000, y sensibilidad, precisión y F1 nulos. El umbral no se fija en 0,5 porque el desequilibrio favorece a la clase mayoritaria; la exactitud equilibrada obliga a considerar ambas clases.
+
+\subsection{Árbol de decisión}
+
+Se empleó un árbol CART con impureza de Gini, pues este criterio produce divisiones binarias traducibles directamente en reglas. La rejilla de búsqueda combina profundidad máxima 1, 2 y 3 con un mínimo de 50, 200 o 500 muestras por hoja, con nueve configuraciones y 255 ajustes. Esta restricción mantiene entre 2 y 8 hojas, un tamaño presentable como lista de reglas, y no impone la profundidad 2 de la Fase I, ya que la validación puede elegir 1, 2 o 3.
+
+Un árbol sin restricciones sirvió de diagnóstico. Su ROC-AUC de entrenamiento próxima a 1, exactitud 99,95\,\%, profundidad de 37 a 54 y entre 3\,522 y 3\,673 hojas, frente a ROC-AUC de validación 0,5985. El contraste evidencia sobreajuste y justifica la restricción. No se usaron pesos de clase porque modifican la distribución efectiva y la probabilidad aprendida, mientras que el umbral ya se ajusta para el desequilibrio. Tampoco se añadió poda posterior, porque la rejilla ya controla la complejidad. GOSDT no se utilizó porque está pensado para variables discretas y aquí hay 11 predictores numéricos.
+
+\subsection{Regresión logística}
+
+La regresión logística modela el log-odds como combinación lineal de las entradas; sus coeficientes se convierten en odds ratios (OR) y permiten leer dirección y magnitud condicional. Las numéricas se estandarizan para que la penalización no dependa de la escala y un coeficiente corresponda a una desviación típica; el one-hot evita colinealidad perfecta y da un contraste interpretable. Se probaron L1 y L2 con $C$ en 0,01, 0,1, 1 y 10, con ocho configuraciones y 230 ajustes, con el solver liblinear y 2\,000 iteraciones. L2 reparte el peso entre predictores correlacionados; L1 puede anular coeficientes y producir una representación dispersa. L1 se seleccionó en las cinco particiones, pero las categorías poco frecuentes alternaron entre cero y no cero, así que la dispersión no prueba irrelevancia.
+
+No se usaron pesos de clase por la misma razón que en el árbol. Tampoco se añadieron splines ni interacciones, porque esta familia es la referencia lineal transparente y esos términos habrían dificultado la lectura conjunta de coeficientes y odds ratios.
+
+\subsection{EBM}
+
+El EBM es un modelo aditivo generalizado (GAM) con 15 funciones univariantes y sin interacciones. El log-odds se descompone en una constante más la suma de las contribuciones de cada variable, lo que permite inspeccionar cada función por separado. Se fijaron dos hojas por función, tasa de aprendizaje 0,05, 2\,000 rondas como máximo, cuatro bolsas externas, 15\,\% de validación interna, parada temprana tras 50 rondas y sin boosting voraz. La rejilla solo varió el número de bins, 16 o 32, que controla la discretización, y el mínimo de muestras por hoja, 10 o 50, que controla el soporte: cuatro configuraciones y 130 ajustes. No se permitieron interacciones porque el requisito es obtener funciones inspeccionables y cada interacción añadiría una superficie que interpretar y comparar. Tampoco se usaron formas más complejas: la estructura aditiva y las funciones por tramos mantienen la misma lectura en los cinco modelos. La Tabla~\ref{tab:search} resume las rejillas y las decisiones fijas de las tres familias.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Espacio de búsqueda de las tres familias. La referencia mayoritaria se evalúa aparte y no forma parte de la búsqueda.}
+\label{tab:search}
+\begin{tabularx}{\textwidth}{@{}p{1.8cm} p{5.6cm} X@{}}
+\toprule
+Familia & Configuraciones & Decisiones fijas \\
+\midrule
+Árbol & 9: profundidad 1, 2, 3 $\times$ mínimo por hoja 50, 200, 500 & CART con Gini; sin pesos de clase ni poda; one-hot sin escalado \\
+Logística & 8: L1, L2 $\times$ $C$ 0,01, 0,1, 1, 10 & liblinear; 2\,000 iteraciones; estandarización; one-hot con referencia; sin pesos \\
+EBM & 4: 16, 32 bins $\times$ 10, 50 muestras por hoja & 2 hojas; tasa 0,05; 2\,000 rondas; 4 bolsas; 15\,\% validación; parada 50; sin interacciones \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Modelo final}
+La búsqueda final repitió el procedimiento de EBM sobre los 25\,000 registros, eligió la configuración por ROC-AUC media y fijó el umbral con las predicciones fuera de bolsa. El ajuste definitivo usó 25\,000 registros, 15 variables y 15 funciones univariantes. El test se empleó solo para predecir, no para elegir configuración ni umbral y no se calcularon métricas sobre él. La selección queda así separada de la evaluación externa.
