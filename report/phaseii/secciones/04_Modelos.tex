@@ -4,7 +4,7 @@ Esta sección interpreta los modelos ajustados. Se distingue entre la estructura
 
 \subsection{Modelo lógico: reglas y probabilidades}
 
-El árbol seleccionado puede leerse como una lista finita de reglas, la Figura~\ref{fig:tree} muestra su estructura. La configuración elegida en las cinco particiones externas fue profundidad máxima 3 y un mínimo de 500 registros por hoja, con umbral 0,25; el modelo resultante tiene profundidad efectiva 3, ocho hojas y quince nodos, y emplea tres variables.
+El árbol seleccionado puede leerse como una lista finita de reglas, la Figura~\ref{fig:tree} muestra su estructura. La configuración elegida en las cinco particiones externas fue profundidad máxima 3 y un mínimo de 500 registros por hoja, con umbral 0,25; el árbol de referencia de la partición 1 tiene profundidad efectiva 3, ocho hojas y quince nodos, y emplea tres variables.
 
 \begin{figure}[H]
 	\centering
@@ -13,7 +13,7 @@ El árbol seleccionado puede leerse como una lista finita de reglas, la Figura~\
 	\label{fig:tree}
 \end{figure}
 
-La raíz divide los registros según \var{latest_repayment_status}: $\le 0{,}5$ frente a $> 0{,}5$. El estado de pago más reciente es la primera distinción del modelo. La segunda división, repetida en ambas ramas, es \var{payment_to_bill_ratio_6m} $\le 0{,}105$, y el tercer nivel recurre a \var{zero_payment_months_6m} con umbrales $2{,}5$ o $3{,}5$. Las probabilidades de las hojas van de 0,0720 (hoja 6) a 0,6932 (hoja 11), de modo que el árbol no solo ordena los casos, sino que también expresa intensidades de riesgo muy distintas. La rama \var{latest_repayment_status} $\le 0{,}5$ contiene las hojas 3, 6 y 7, con probabilidades inferiores a 0,20, mientras que la hoja 4 alcanza 0,4062; la rama \var{latest_repayment_status} $> 0{,}5$ concentra tres de las cuatro hojas positivas (10, 11 y 14). Dentro de la rama de bajo \var{latest_repayment_status} y bajo \var{payment_to_bill_ratio_6m}, superar \var{zero_payment_months_6m} $= 3{,}5$ eleva la probabilidad de 0,1920 a 0,4062, más del doble. Con umbral 0,5 solo la hoja 11 predeciría la clase 1; al bajarlo a 0,25 se añaden las hojas 4, 10 y 14, la sensibilidad pasa del 14,31\,\% al 48,90\,\% y la precisión cae de 0,6812 a 0,4805. El comportamiento operativo del árbol depende, por tanto, de una decisión externa al ajuste.
+La raíz divide los registros según \var{latest_repayment_status}: $\le 0{,}5$ frente a $> 0{,}5$. El estado de pago más reciente es la primera distinción del modelo. La segunda división, repetida en ambas ramas, es \var{payment_to_bill_ratio_6m} $\le 0{,}105$, y el tercer nivel recurre a \var{zero_payment_months_6m} con umbrales $2{,}5$ o $3{,}5$. Las probabilidades de las hojas van de 0,0720 (hoja 6) a 0,6932 (hoja 11), de modo que el árbol no solo ordena los casos, sino que también expresa intensidades de riesgo muy distintas. La rama \var{latest_repayment_status} $\le 0{,}5$ contiene las hojas 3, 6 y 7, con probabilidades inferiores a 0,20, mientras que la hoja 4 alcanza 0,4062; la rama \var{latest_repayment_status} $> 0{,}5$ concentra tres de las cuatro hojas positivas (10, 11 y 14). Dentro de la rama de bajo \var{latest_repayment_status} y bajo \var{payment_to_bill_ratio_6m}, superar \var{zero_payment_months_6m} $= 3{,}5$ eleva la probabilidad de 0,1920 a 0,4062, más del doble. Con umbral 0,5 solo la hoja 11 predeciría la clase 1; al bajarlo a 0,25 se añaden las hojas 4, 10 y 14. En la evaluación externa, como medias de los cinco árboles, la sensibilidad pasa del 14,31\,\% al 48,90\,\% y la precisión cae de 0,6812 a 0,4805. El comportamiento operativo del árbol depende, por tanto, de una decisión externa al ajuste.
 
 La importancia Gini de la partición 1 es 57,25\,\% para \var{latest_repayment_status}, 29,71\,\% para \var{payment_to_bill_ratio_6m} y 13,05\,\% para \var{zero_payment_months_6m}; las otras doce variables no se usan. Esa concentración explica la legibilidad del modelo y también su límite, ya que tres variables resumen el riesgo y el resto de la información queda fuera. Las probabilidades de las hojas son frecuencias de entrenamiento, no probabilidades calibradas, es decir, que una hoja con 0,4646 se clasifique como positiva depende del umbral escogido (0,25 en nuestro caso).
 
@@ -28,7 +28,7 @@ La regresión logística supone que el logaritmo de las odds de dificultad de pa
 \]
 donde $z_j$ representa una variable numérica estandarizada o una columna indicadora del one-hot. Cada $\beta_j$ cuantifica el cambio en log-odds asociado a una unidad de $z_j$ mientras el resto se mantiene fijo. Es una asociación condicional del modelo, no un efecto causal. La exponenciación da la odds ratio (OR), $\mathrm{OR}_j=e^{\beta_j}$, que expresa cuánto se multiplican las odds, no la probabilidad.
 
-Las variables categóricas se codificaron con one-hot y la primera categoría como referencia, de modo que sus coeficientes se interpretan frente a ella. En la partición~1 las referencias son \var{female}, \var{graduate_school}, \var{married} y plan \var{no}. El término independiente, $-1{,}6022$, es el log-odds del perfil de referencia con todas las numéricas en su media, ya que están estandarizadas, y corresponde a una probabilidad de $16{,}77$\,\%. La tabla~\ref{tab:logistic-coefficients} recoge los ocho coeficientes principales de esa partición.
+Las variables categóricas se codificaron con one-hot y la primera categoría como referencia, de modo que sus coeficientes se interpretan frente a ella. En la partición~1 las referencias son \var{female}, \var{graduate_school}, \var{married} y plan \var{no}. El término independiente, $-1{,}6022$, es el log-odds del perfil de referencia con todas las numéricas en su media, ya que están estandarizadas, y corresponde a una probabilidad de $16{,}77$\,\%. La tabla~\ref{tab:logistic-coefficients} recoge ocho coeficientes seleccionados de esa partición.
 
 \begin{table}[H]
 \centering
@@ -43,9 +43,9 @@ Entrada & Coeficiente & OR & Contraste \\
 \var{latest_repayment_status} & $0{,}4288$ & $1{,}5354$ & 1 DT  $=1{,}1215$ códigos \\
 \var{utilization_sep} & $0{,}3841$ & $1{,}4683$ & 1 DT $=0{,}4050$ \\
 \var{delayed_months_6m} & $0{,}2958$ & $1{,}3441$ & 1 DT $=1{,}5468$ meses \\
-\var{total_payment_6m} & $-0{,}1682$ & $0{,}8500$ & 1 DT  $=58\,798{,}84$  \\
-\var{maximum_repayment_delay_6m} & $-0{,}1216$ & $0{,}8900$ & 1 DT  $=1{,}0678$ meses\\
-\var{sex_male} & $-0{,}0430$ & $0{,}9600$ & \var{male} frente a \var{female} \\
+\var{total_payment_6m} & $-0{,}1682$ & $0{,}8452$ & 1 DT  $=58\,798{,}84$  \\
+\var{maximum_repayment_delay_6m} & $-0{,}1216$ & $0{,}8855$ & 1 DT  $=1{,}0678$ meses\\
+\var{sex_male} & $-0{,}0430$ & $0{,}9579$ & \var{male} frente a \var{female} \\
 \bottomrule
 \end{tabularx}
 \caption{Coeficientes y odds ratios de la regresión logística en la partición~1. Las variables numéricas se expresan por una desviación típica (DT); las categóricas, frente a la categoría de referencia.}
@@ -80,7 +80,7 @@ Variable & Importancia global & Lectura \\
 \var{zero_payment_months_6m} (Z) & 0,2134 & Uno y dos meses, menor contribución que cero meses; desde tres, positiva. \\
 \var{delayed_months_6m} & 0,1830 & Crece con la acumulación de retrasos. \\
 \var{repayment_assistance_plan} & 0,1632 & \textit{yes} frente a \textit{no}: $+0{,}491$ log-odds. \\
-\var{age} & 0,1349 & No lineal; extremos con menos respaldo. \\
+\var{age} & 0,1500 & No lineal; extremos con menos respaldo. \\
 \bottomrule
 \end{tabularx}
 \caption{Importancia global de seis funciones del EBM en la partición 1. La importancia es la media del valor absoluto de la contribución, en log-odds. La última columna resume la forma observada.}
@@ -109,7 +109,7 @@ En la figura \ref{fig:ebm-estability}, observamos que la estabilidad entre parti
 
 \subsection{Explicaciones locales comparadas}
 
-Para contrastar las explicaciones más allá de los resúmenes globales, se examinaron cuatro registros de la partición 1 con sus umbrales internos: $0{,}25$ para el árbol y la regresión logística, y $0{,}20$ para el EBM. La Tabla~\ref{tab:local-cases} recoge las probabilidades estimadas de la clase 1. Las cuatro probabilidades son inferiores a $0{,}5$, de modo que la decisión depende del umbral y no solo del orden entre modelos.
+Para contrastar las explicaciones más allá de los resúmenes globales, se examinaron cuatro registros de la partición 1 con sus umbrales internos: $0{,}25$ para el árbol y la regresión logística, y $0{,}20$ para el EBM. La Tabla~\ref{tab:local-cases} recoge las probabilidades estimadas de la clase 1. Todas las probabilidades de los cuatro casos son inferiores a $0{,}5$, de modo que la decisión depende del umbral y no solo del orden entre modelos.
 
 
 \begin{table}[H]
